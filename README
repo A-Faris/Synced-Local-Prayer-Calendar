@@ -22,33 +22,37 @@ https://github.com/new
 
 Link your local project to the GitHub repository:
 
-Configure your GitHub email (replace with your own):
+Configure your GitHub email (replace with your own)
 
 `git config --global user.email "your-email"`
 
-Initialise a local repository:
+Initialise a local repository
 
 `git init`
 
-Add all project files:
+Add all project files
 
 `git add .`
 
-Commit your changes:
+Commit your changes
 
 `git commit -m "Initial commit"`
 
-Link to your GitHub repository (replace with your own URL):
+Link to your GitHub repository (replace with your own URL)
 
 `git remote add origin your-github-url`
 
-Set the main branch:
+Set the main branch
 
 `git branch -M main`
 
-Push your code to GitHub:
+Push your code to GitHub
 
 `git push -u origin main`
+
+Check Git status
+
+`git status`
 
 ### Download Python
 
