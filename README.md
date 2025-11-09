@@ -1,17 +1,16 @@
 # Prayer Times to Google Calendar
+
 ## Overview
 
-Muslims pray five times a day and often check the prayer times multiple times throughout the day. By making this process more convenient, we can save time and plan our days more effectively around prayers. This project integrates Leeds Grand Mosque prayer times with a public Google Calendar, allowing Muslims to easily add the daily schedule to their personal calendars.
+This project scrapes daily prayer times from the Leeds Grand Mosque website and updates a Google Calendar so users can subscribe to a public calendar and view daily prayer schedules on any device.
 
 ## Features
 
-- Scrapes daily prayer times from the Leeds Grand Mosque website using Beautiful Soup
+- Scrapes prayer times (Beautiful Soup)
 
-- Integrates with the Google Calendar API to update events automatically
+- Creates/updates events in Google Calendar (Google Calendar API)
 
-- Runs daily on Google Cloud Platform (GCP) using Cloud Functions and Cloud Scheduler
-
-- Provides a public calendar users can subscribe to from any device
+- Deployable as a scheduled job on Google Cloud (Cloud Functions + Cloud Scheduler)
 
 ## Setting up the Project
 
@@ -22,37 +21,27 @@ https://github.com/new
 
 Link your local project to the GitHub repository:
 
+```bash
+git config --global user.email "your-email"
+
+git init
+
+git add .
+
+git commit -m "Initial commit"
+
+git remote add origin your-github-url
+
+git branch -M main
+
+git push -u origin main
+
+git status
+```
+
 Configure your GitHub email (replace with your own)
 
-`git config --global user.email "your-email"`
-
-Initialise a local repository
-
-`git init`
-
-Add all project files
-
-`git add .`
-
-Commit your changes
-
-`git commit -m "Initial commit"`
-
 Link to your GitHub repository (replace with your own URL)
-
-`git remote add origin your-github-url`
-
-Set the main branch
-
-`git branch -M main`
-
-Push your code to GitHub
-
-`git push -u origin main`
-
-Check Git status
-
-`git status`
 
 ### Download Python
 
@@ -82,9 +71,9 @@ Deactivate the virtual environment
 
 ## Configuration
 
-Create a .env file in the project root and add the following environment variables:
+Create a `.env` file in the project root containing:
 
-```
+```bash
 GOOGLE_API_KEY=your_api_key_here
 CALENDAR_ID=your_calendar_id_here
 PRAYER_TIMES_URL=https://www.leedsgrandmosque.com/
@@ -100,13 +89,12 @@ Run the script locally for testing
 
 `python main.py`
 
-## Deployment on GCP
-
+The script will scrape the configured `PRAYER_TIMES_URL` and attempt to update events in the configured calendar.
 
 ## Usage
 
-Once deployed, the function:
+Once deployed, the scheduled function will:
 
-- Scrapes prayer times for the current day from the Leeds Grand Mosque website
+- Scrape prayer times for the current day from the configured `PRAYER_TIMES_URL`
 
-- Updates the prayer times in the connected Google Calendar
+- Create or update events in the configured Google Calendar
