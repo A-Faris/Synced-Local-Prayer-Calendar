@@ -1,0 +1,64 @@
+# Leeds Grand Mosque Prayer Times to Google Calendar
+## Overview
+
+Muslims pray five times a day and often check the prayer times multiple times throughout the day. By making this process more convenient, we can save time and plan our days more effectively around prayers. This project integrates Leeds Grand Mosque prayer times with a public Google Calendar, allowing Muslims to easily add the daily schedule to their personal calendars.
+
+## Features
+
+- Scrapes daily prayer times from the Leeds Grand Mosque website using Beautiful Soup
+
+- Integrates with the Google Calendar API to update events automatically
+
+- Runs daily on Google Cloud Platform (GCP) using Cloud Functions and Cloud Scheduler
+
+- Provides a public calendar users can subscribe to from any device
+
+## Setting up the Project
+
+Download and install the latest version of Python
+https://www.python.org/downloads/
+
+(Python version used: 3.13.7)
+
+Verify the installation
+
+`python -V`
+
+Create a virtual environment
+
+`python -m venv .venv`
+
+Activate the virtual environment
+
+`source .venv/bin/activate`
+
+Install dependencies
+
+`pip install -r requirements.txt`
+
+Run the script locally for testing
+
+`python main.py`
+
+Deactivate the virtual environment
+
+`deactivate`
+
+## Configuration
+
+Create a .env file in the project root and add the following environment variables:
+
+GOOGLE_API_KEY=your_api_key_here
+CALENDAR_ID=your_calendar_id_here
+PRAYER_TIMES_URL=https://www.leedsgrandmosque.com/
+
+## Deployment on GCP
+
+
+## Usage
+
+Once deployed, the function:
+
+- Scrapes prayer times for the current day from the Leeds Grand Mosque website
+
+- Updates the prayer times in the connected Google Calendar
