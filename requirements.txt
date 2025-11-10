@@ -1,4 +1,5 @@
 bs4
 requests
+datetime
 python-dotenv
 google-api-python-client
