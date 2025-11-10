@@ -22,9 +22,9 @@ def find_prayer_times(url):
 
     return prayer_times
 
-def get_service_account_credentials(PROJECT_ID):
+def get_service_account_credentials(PROJECT_ID, SECRET_NAME):
     client = secretmanager.SecretManagerServiceClient()
-    secret_name = f"projects/{PROJECT_ID}/secrets/service_account/versions/latest"
+    secret_name = f"projects/{PROJECT_ID}/secrets/{SECRET_NAME}/versions/latest"
     response = client.access_secret_version(name=secret_name)
     service_account_info = json.loads(response.payload.data.decode("UTF-8"))
     # https://developers.google.com/workspace/calendar/api/auth
@@ -54,7 +54,8 @@ if __name__ == "__main__":
     load_dotenv()
     CALENDAR_ID = os.getenv("CALENDAR_ID")
     PROJECT_ID = os.getenv("PROJECT_ID")
-    credentials = get_service_account_credentials(PROJECT_ID)
+    SECRET_NAME = os.getenv("SECRET_NAME")
+    credentials = get_service_account_credentials(PROJECT_ID, SECRET_NAME)
 
     for prayer, time in prayer_times.items():
         event = create_event(prayer, time, CALENDAR_ID, credentials)
