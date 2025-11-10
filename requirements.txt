@@ -3,3 +3,4 @@ requests
 datetime
 python-dotenv
 google-api-python-client
+google-cloud-secret-manager
