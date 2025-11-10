@@ -24,7 +24,7 @@ def find_prayer_times(url):
 
 def get_service_account_credentials(PROJECT_ID):
     client = secretmanager.SecretManagerServiceClient()
-    secret_name = f"projects/{PROJECT_ID}/secrets/calendar-key/versions/latest"
+    secret_name = f"projects/{PROJECT_ID}/secrets/service_account/versions/latest"
     response = client.access_secret_version(name=secret_name)
     service_account_info = json.loads(response.payload.data.decode("UTF-8"))
     # https://developers.google.com/workspace/calendar/api/auth
@@ -42,8 +42,8 @@ def create_event(prayer, time, CALENDAR_ID, credentials):
     # https://developers.google.com/resources/api-libraries/documentation/calendar/v3/python/latest/calendar_v3.events.html#insert
     event = {
         "summary": prayer,
-        "start": {"dateTime": start_dt.isoformat()},
-        "end": {"dateTime": start_dt.isoformat()},
+        "start": {"dateTime": start_dt.isoformat(), "timeZone": "Europe/London"},
+        "end": {"dateTime": start_dt.isoformat(), "timeZone": "Europe/London"},
     }
 
     return service.events().insert(calendarId=CALENDAR_ID, body=event).execute()
