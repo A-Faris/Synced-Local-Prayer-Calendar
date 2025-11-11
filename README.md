@@ -14,7 +14,7 @@ This project scrapes daily prayer times from the Leeds Grand Mosque website and 
 
 ## Setting up the Project
 
-### Setting up GitHub Repository
+### GitHub Repository
 
 Create GitHub repository
 https://github.com/new
@@ -41,7 +41,7 @@ git status
 
 Replace "your-email@example.com" and <your-github-url> with your details.
 
-### Download Python
+### Install Python
 
 Download and install the latest version of Python: https://www.python.org/downloads/
 (Python version used: 3.13.7)
@@ -65,7 +65,7 @@ docker --version
 ### Create Virtual Environment 
 
 ```bash
-python -m venv .venv        # Create virtual environment
+python -m venv .venv        
 source .venv/bin/activate   # Activate the environment
 deactivate                  # Deactivate the environment
 ```
