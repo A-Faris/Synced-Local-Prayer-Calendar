@@ -2,15 +2,15 @@
 
 ## Overview
 
-This project scrapes daily prayer times from the Leeds Grand Mosque website and updates a Google Calendar so users can subscribe to a public calendar and view daily prayer schedules on any device.
+This project scrapes daily prayer times from the Leeds Grand Mosque website and updates a Google Calendar. Users can subscribe to this calendar to view daily prayer schedules on any device.#
 
 ## Features
 
-- Scrapes prayer times (Beautiful Soup)
+- Scrapes prayer times using Beautiful Soup
 
-- Creates/updates events in Google Calendar (Google Calendar API)
+- Creates events in Google Calendar via the Google Calendar API
 
-- Deployable as a scheduled job on Google Cloud (Cloud Functions + Cloud Scheduler)
+- Deployable as a scheduled job on Google Cloud (Cloud Run + Cloud Scheduler)
 
 ## Setting up the Project
 
@@ -22,7 +22,7 @@ https://github.com/new
 Link your local project to the GitHub repository:
 
 ```bash
-git config --global user.email "your-email"
+git config --global user.email "your-email@example.com"
 
 git init
 
@@ -30,7 +30,7 @@ git add .
 
 git commit -m "Initial commit"
 
-git remote add origin your-github-url
+git remote add origin <your-github-url>
 
 git branch -M main
 
@@ -39,62 +39,69 @@ git push -u origin main
 git status
 ```
 
-Configure your GitHub email (replace with your own)
-
-Link to your GitHub repository (replace with your own URL)
+Replace "your-email@example.com" and <your-github-url> with your details.
 
 ### Download Python
 
-Download and install the latest version of Python
-https://www.python.org/downloads/
-
+Download and install the latest version of Python: https://www.python.org/downloads/
 (Python version used: 3.13.7)
 
-Verify the installation
+Verify installation:
 
-`python -V`
+```bash
+python --version
+```
 
-### Set up Virtual Environment 
+### Install Docker
 
-Create a virtual environment
+Download Docker Desktop: https://www.docker.com/products/docker-desktop/
 
-`python -m venv .venv`
+Verify installation:
 
-Activate the virtual environment
+```bash
+docker --version
+```
 
-`source .venv/bin/activate`
+### Create Virtual Environment 
 
-Deactivate the virtual environment
-
-`deactivate`
-
+```bash
+python -m venv .venv        # Create virtual environment
+source .venv/bin/activate   # Activate the environment
+deactivate                  # Deactivate the environment
+```
 
 ## Configuration
 
 Create a `.env` file in the project root containing:
 
 ```bash
-GOOGLE_API_KEY=your_api_key_here
-CALENDAR_ID=your_calendar_id_here
-PRAYER_TIMES_URL=https://www.leedsgrandmosque.com/
+CALENDAR_ID="your_calendar_id_here"
+PROJECT_ID="your_project_id_here"
+SECRET_NAME="your_secret_name_here"
 ```
 
-## Run the Project
+Make sure your service account secret exists in Google Secret Manager and has permission to access the calendar.
 
-Install dependencies
+## Run the Project Locally
 
-`pip install -r requirements.txt`
+Activate virtual environment then install dependencies
+
+```bash
+pip install -r requirements.txt
+```
 
 Run the script locally for testing
 
-`python main.py`
+```bash
+python main.py
+```
 
-The script will scrape the configured `PRAYER_TIMES_URL` and attempt to update events in the configured calendar.
+This will scrape the prayer times and create events in your Google Calendar.
 
 ## Usage
 
 Once deployed, the scheduled function will:
 
-- Scrape prayer times for the current day from the configured `PRAYER_TIMES_URL`
+- Scrape prayer times for the current day
 
-- Create or update events in the configured Google Calendar
+- Create events in the configured Google Calendar
