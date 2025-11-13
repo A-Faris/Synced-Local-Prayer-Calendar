@@ -1,62 +1,51 @@
+import requests
 from bs4 import BeautifulSoup
+from datetime import datetime, date
 from dotenv import load_dotenv
+from google.cloud import secretmanager
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
-from datetime import datetime, date
-import requests
 
-from google.cloud import secretmanager
-import os
-import json
+import os, json
+
+def get_service_account_credentials():
+    load_dotenv()
+    project_id = os.getenv("GOOGLE_CLOUD_PROJECT")
+    client = secretmanager.SecretManagerServiceClient()
+    secret = list(client.list_secrets(parent=f"projects/{project_id}"))[0]
+    payload = client.access_secret_version(
+        name=f"{secret.name}/versions/latest"
+    ).payload.data.decode("UTF-8")
+
+    return service_account.Credentials.from_service_account_info(
+        json.loads(payload),
+        scopes=["https://www.googleapis.com/auth/calendar"]
+    )
 
 def find_prayer_times(url):
-    response = requests.get(url)
-    soup = BeautifulSoup(response.text, "html.parser")
-
-    prayer_times = {}
-    prayer_list = soup.find(class_="prayers-list").find_all("li")
-    for prayer in prayer_list:
-        name = prayer.find(class_="prayer-name").text.capitalize()
-        time = prayer.find(class_="date").text
-        prayer_times[name] = time
-
-    return prayer_times
-
-def get_service_account_credentials(PROJECT_ID, SECRET_NAME):
-    client = secretmanager.SecretManagerServiceClient()
-    secret_name = f"projects/{PROJECT_ID}/secrets/{SECRET_NAME}/versions/latest"
-    response = client.access_secret_version(name=secret_name)
-    service_account_info = json.loads(response.payload.data.decode("UTF-8"))
-    # https://developers.google.com/workspace/calendar/api/auth
-    SCOPES = ["https://www.googleapis.com/auth/calendar.events"]
-    return service_account.Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
-
-
-def create_event(prayer, time, CALENDAR_ID, credentials):
-    service = build('calendar', 'v3', credentials=credentials)
-
-    hour, minute = map(int, time.split(":"))
-    today = date.today()
-    start_dt = datetime(today.year, today.month, today.day, hour, minute)
-
-    # https://developers.google.com/resources/api-libraries/documentation/calendar/v3/python/latest/calendar_v3.events.html#insert
-    event = {
-        "summary": prayer,
-        "start": {"dateTime": start_dt.isoformat(), "timeZone": "Europe/London"},
-        "end": {"dateTime": start_dt.isoformat(), "timeZone": "Europe/London"},
+    soup = BeautifulSoup(requests.get(url).text, "html.parser")
+    return {
+        prayer.find(class_="prayer-name").text.capitalize():
+        prayer.find(class_="date").text
+        for prayer in soup.find(class_="prayers-list").find_all("li")
     }
 
-    return service.events().insert(calendarId=CALENDAR_ID, body=event).execute()
+def create_event(service, calendar_id, prayer, time):
+    dt = datetime.combine(date.today(), datetime.strptime(time, "%H:%M").time())
+    event = {
+        "summary": prayer,
+        "start": {"dateTime": dt.isoformat(), "timeZone": "Europe/London"},
+        "end": {"dateTime": dt.isoformat(), "timeZone": "Europe/London"},
+    }
+    created = service.events().insert(calendarId=calendar_id, body=event).execute()
+    print("Event created:", created.get('htmlLink'))
 
 if __name__ == "__main__":
-    prayer_times = find_prayer_times("https://www.leedsgrandmosque.com/")
-    
-    load_dotenv()
-    CALENDAR_ID = os.getenv("CALENDAR_ID")
-    PROJECT_ID = os.getenv("PROJECT_ID")
-    SECRET_NAME = os.getenv("SECRET_NAME")
-    credentials = get_service_account_credentials(PROJECT_ID, SECRET_NAME)
+    service = build('calendar', 'v3', credentials=get_service_account_credentials())
 
-    for prayer, time in prayer_times.items():
-        event = create_event(prayer, time, CALENDAR_ID, credentials)
-        print(f"Event created: {event.get('htmlLink')}")
+    calendar_id = service.calendarList().list().execute().get('items', [])[0]['id']
+
+    for prayer, time in find_prayer_times("https://www.leedsgrandmosque.com/").items():
+        create_event(service, calendar_id, prayer, time)
+
+    print(f"🔗 Subscribe to this calendar: https://calendar.google.com/calendar/u/0/r?cid={calendar_id}")
