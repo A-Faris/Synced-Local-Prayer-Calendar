@@ -10,9 +10,9 @@ fi
 export $(grep -v '^#' .env | xargs)
 
 # Required variables from .env:
-# GOOGLE_CLOUD_PROJECT, SA_NAME, REGION, SECRET_NAME, KEY_FILE
+# GOOGLE_CLOUD_PROJECT, SA_NAME, REGION, SECRET_NAME
 
-if [[ -z "$GOOGLE_CLOUD_PROJECT" || -z "$SA_NAME" || -z "$REGION" || -z "$SECRET_NAME" || -z "$KEY_FILE" ]]; then
+if [[ -z "$GOOGLE_CLOUD_PROJECT" || -z "$SA_NAME" || -z "$REGION" || -z "$SECRET_NAME" ]]; then
   echo "❌ Missing required environment variables in .env!"
   exit 1
 fi
@@ -20,78 +20,59 @@ fi
 SA_EMAIL="$SA_NAME@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com"
 
 echo
-echo "🚀 Starting fresh setup for service account:"
+echo "🚀 Setting up service account (if not existing):"
 echo "$SA_EMAIL"
 echo "----------------------------------------------------"
 echo
 
-# ---------- 1️⃣ Delete existing service account ----------
-echo "🔹 Checking for existing service account..."
+# ---------- 1️⃣ Create service account if not exists ----------
 if gcloud iam service-accounts describe $SA_EMAIL --project $GOOGLE_CLOUD_PROJECT >/dev/null 2>&1; then
-  gcloud iam service-accounts delete $SA_EMAIL --quiet --project $GOOGLE_CLOUD_PROJECT
-  echo "✅ Deleted old service account."
+  echo "✅ Service account already exists."
 else
-  echo "✅ No existing service account found."
+  echo "🔹 Creating new service account..."
+  gcloud iam service-accounts create $SA_NAME \
+    --project $GOOGLE_CLOUD_PROJECT \
+    --display-name "Prayer Scraper Cloud Run Job Service Account"
+  echo "✅ Service account created."
 fi
 echo
 
-# ---------- 2️⃣ Create new service account ----------
-echo "🔹 Creating new service account..."
-gcloud iam service-accounts create $SA_NAME \
-  --project $GOOGLE_CLOUD_PROJECT \
-  --display-name "Prayer Scraper Cloud Run Job Service Account"
-echo "✅ Service account created."
-echo
-
-# ---------- 3️⃣ Assign roles ----------
-echo "🔹 Assigning required roles..."
+# ---------- 2️⃣ Assign roles ----------
+echo "🔹 Assigning required roles (if not already assigned)..."
 for role in roles/run.jobsExecutor roles/secretmanager.secretAccessor; do
-  echo "🔹 Granting $role..."
-  gcloud projects add-iam-policy-binding $GOOGLE_CLOUD_PROJECT \
-    --member="serviceAccount:$SA_EMAIL" \
-    --role="$role"
+  if gcloud projects get-iam-policy $GOOGLE_CLOUD_PROJECT \
+       --flatten="bindings[].members" \
+       --format="value(bindings.role)" \
+       --filter="bindings.members:serviceAccount:$SA_EMAIL" | grep -q "$role"; then
+    echo "✅ $role already assigned."
+  else
+    echo "🔹 Granting $role..."
+    gcloud projects add-iam-policy-binding $GOOGLE_CLOUD_PROJECT \
+      --member="serviceAccount:$SA_EMAIL" \
+      --role="$role"
+  fi
 done
-echo "✅ Roles assigned."
 echo
 
-# ---------- 4️⃣ Generate service account key ----------
-echo "🔹 Generating new key..."
-rm -f $KEY_FILE
-gcloud iam service-accounts keys create $KEY_FILE \
-  --iam-account $SA_EMAIL \
-  --project $GOOGLE_CLOUD_PROJECT
-echo "✅ Key created."
-echo
-
-# ---------- 5️⃣ Replace secret in Secret Manager ----------
-echo "🔹 Checking for existing secret in Secret Manager..."
+# ---------- 3️⃣ Create secret if not exists ----------
 if gcloud secrets describe $SECRET_NAME --project $GOOGLE_CLOUD_PROJECT >/dev/null 2>&1; then
-  gcloud secrets delete $SECRET_NAME --quiet --project $GOOGLE_CLOUD_PROJECT
-  echo "✅ Deleted old secret."
+  echo "✅ Secret already exists. Skipping key creation."
 else
-  echo "✅ No existing secret found."
+  echo "🔹 Creating new secret..."
+  gcloud secrets create $SECRET_NAME --replication-policy="automatic" --project $GOOGLE_CLOUD_PROJECT
+
+  echo "🔹 Generating service account key and adding to secret..."
+  gcloud iam service-accounts keys create /tmp/temp-key.json \
+    --iam-account $SA_EMAIL \
+    --project $GOOGLE_CLOUD_PROJECT
+
+  gcloud secrets versions add $SECRET_NAME \
+    --data-file=/tmp/temp-key.json \
+    --project $GOOGLE_CLOUD_PROJECT
+
+  rm -f /tmp/temp-key.json
+  echo "✅ Key added to Secret Manager and local temp file removed."
 fi
 echo
 
-# ---------- 6️⃣ Create new secret ----------
-echo "🔹 Creating fresh secret..."
-gcloud secrets create $SECRET_NAME \
-  --replication-policy="automatic" \
-  --project $GOOGLE_CLOUD_PROJECT
-
-echo "🔹 Adding key to secret..."
-gcloud secrets versions add $SECRET_NAME \
-  --data-file=$KEY_FILE \
-  --project $GOOGLE_CLOUD_PROJECT
-
-echo "✅ Secret updated."
-echo
-
-# ---------- 7️⃣ Clean up ----------
-echo "🧹 Removing local key file..."
-rm -f $KEY_FILE
-echo "✅ Local key removed."
-echo
-
-echo "🎉 All done! Service account, roles, and secret fully reset and ready."
-echo
+echo "🎉 Setup complete. Service account, roles, and secret are ready."
