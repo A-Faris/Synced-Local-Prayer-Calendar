@@ -47,5 +47,3 @@ if __name__ == "__main__":
 
     for prayer, time in find_prayer_times("https://www.leedsgrandmosque.com/").items():
         create_event(service, calendar_id, prayer, time)
-
-    print(f"🔗 Subscribe to this calendar: https://calendar.google.com/calendar/u/0/r?cid={calendar_id}")
