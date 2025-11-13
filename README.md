@@ -30,7 +30,7 @@ git add .
 
 git commit -m "Initial commit"
 
-git remote add origin <your-github-url>
+git remote add origin your-github-url
 
 git branch -M main
 
@@ -39,7 +39,7 @@ git push -u origin main
 git status
 ```
 
-Replace "your-email@example.com" and <your-github-url> with your details.
+Replace "your-email@example.com" and your-github-url with your details.
 
 ### Install Python
 

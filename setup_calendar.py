@@ -28,7 +28,7 @@ def get_or_create_calendar(service, CALENDAR_NAME):
     return calendar_id
 
 def share_calendar(service, calendar_id, email):
-    service.acl().insert(calendarId=calendar_id, body={"role": "owner", "scope": {"type": "user", "value": email}}).execute()
+    service.acl().insert(calendarId=calendar_id, body={"role": "writer", "scope": {"type": "user", "value": email}}).execute()
     print(f"✅ Calendar is shared with {email}")
 
 if __name__ == "__main__":
