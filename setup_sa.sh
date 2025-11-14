@@ -7,7 +7,10 @@ if [ ! -f .env ]; then
   exit 1
 fi
 
-export $(grep -v '^#' .env | xargs)
+set -o allexport
+source .env
+set +o allexport
+
 REQUIRED_VARS=("GOOGLE_CLOUD_PROJECT" "SA_NAME" "REGION" "SECRET_NAME")
 
 for var in "${REQUIRED_VARS[@]}"; do
@@ -19,7 +22,11 @@ done
 
 SA_EMAIL="$SA_NAME@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com"
 
-echo -e "\n🚀 Setting up service account:\n$SA_EMAIL"
+echo -e "\n🚀 Setting up service account:"
+echo "Service Account: $SA_EMAIL"
+echo "Project: $GOOGLE_CLOUD_PROJECT"
+echo "Region: $REGION"
+echo "Secret Name: $SECRET_NAME"
 echo "----------------------------------------------------"
 
 # ---------- 1️⃣ Create service account if needed ----------
