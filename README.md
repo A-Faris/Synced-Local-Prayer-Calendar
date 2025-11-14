@@ -10,10 +10,6 @@ This project scrapes daily prayer times from the Leeds Grand Mosque website and 
 - Creates events in Google Calendar via the Google Calendar API
 - Deployable as a scheduled job on Google Cloud (Cloud Run + Cloud Scheduler)
 
-## Architecture Diagram
-
-![Prayer Times Architecture Diagram](Prayer Times Architecture Diagram.png)
-
 ## 1. Install Required Tools
 
 Download and install the following:
