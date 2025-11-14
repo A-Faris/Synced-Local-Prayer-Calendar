@@ -128,3 +128,11 @@ python main.py
 ```
 
 This will scrape the prayer times and create events in your Google Calendar.
+
+## 9. Google Calendar Links
+
+You can view or subscribe to the Leeds Grand Mosque Prayer Times calendar:
+
+- **View Live Calendar:** [Open Calendar](https://calendar.google.com/calendar/u/0/embed?src=3b62801c6ae1b791769131be4e222cb93fcb59a55e997cd4a6a2b1bed5e86253@group.calendar.google.com&ctz=Europe/London)
+- **Subscribe to Calendar:** [Subscribe Link](https://calendar.google.com/calendar/u/0/r?cid=3b62801c6ae1b791769131be4e222cb93fcb59a55e997cd4a6a2b1bed5e86253@group.calendar.google.com)
+- **iCal Subscription:** [Download .ics](https://calendar.google.com/calendar/ical/3b62801c6ae1b791769131be4e222cb93fcb59a55e997cd4a6a2b1bed5e86253%40group.calendar.google.com/public/basic.ics)
