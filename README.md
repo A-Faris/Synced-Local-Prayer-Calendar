@@ -157,7 +157,8 @@ gcloud run jobs execute $SERVICE_NAME \
 ```
 
 These will scrape the prayer times and create events in your Google Calendar.
-## 9. Google Calendar Links
+
+## Google Calendar Links
 
 You can view or subscribe to the Leeds Grand Mosque Prayer Times calendar:
 
