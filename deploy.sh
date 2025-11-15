@@ -12,7 +12,7 @@ source .env
 set +o allexport
 
 # ---------- REQUIRED VARS ----------
-REQUIRED_VARS=("GOOGLE_CLOUD_PROJECT" "REGION" "REPO" "IMAGE_NAME" "SERVICE_NAME" "SCHEDULE" "TIMEZONE" "SA_NAME")
+REQUIRED_VARS=("PROJECT_ID" "REGION" "REPO" "IMAGE_NAME" "SERVICE_NAME" "SCHEDULE" "TIMEZONE" "SA_NAME")
 for var in "${REQUIRED_VARS[@]}"; do
   if [ -z "${!var}" ]; then
     echo "❌ Missing required env var: $var"
@@ -20,11 +20,11 @@ for var in "${REQUIRED_VARS[@]}"; do
   fi
 done
 
-SA_EMAIL="$SA_NAME@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com"
-IMAGE_URI="$REGION-docker.pkg.dev/$GOOGLE_CLOUD_PROJECT/$REPO/$IMAGE_NAME"
+SA_EMAIL="$SA_NAME@$PROJECT_ID.iam.gserviceaccount.com"
+IMAGE_URI="$REGION-docker.pkg.dev/$PROJECT_ID/$REPO/$IMAGE_NAME"
 
 echo -e "\n🚀 FULL DEPLOYMENT START"
-echo "Project: $GOOGLE_CLOUD_PROJECT"
+echo "Project: $PROJECT_ID"
 echo "Region: $REGION"
 echo "Repo: $REPO"
 echo "Image: $IMAGE_URI"
@@ -37,12 +37,12 @@ echo "----------------------------------------------------"
 echo "🔍 Checking Artifact Registry repo..."
 if ! gcloud artifacts repositories describe "$REPO" \
      --location="$REGION" \
-     --project="$GOOGLE_CLOUD_PROJECT" >/dev/null 2>&1; then
+     --project="$PROJECT_ID" >/dev/null 2>&1; then
   echo "⚠️ Repo missing — creating..."
   gcloud artifacts repositories create "$REPO" \
     --repository-format=docker \
     --location="$REGION" \
-    --project="$GOOGLE_CLOUD_PROJECT"
+    --project="$PROJECT_ID"
   echo "✅ Repo created"
 else
   echo "✅ Repo exists"
@@ -61,7 +61,7 @@ echo "🛠 Deploying Cloud Run Job..."
 gcloud run jobs deploy "$SERVICE_NAME" \
   --image "$IMAGE_URI" \
   --region "$REGION" \
-  --project "$GOOGLE_CLOUD_PROJECT" \
+  --project "$PROJECT_ID" \
   --max-retries=0 \
   --memory=512Mi \
   --cpu=1 \
@@ -74,22 +74,22 @@ echo "⏰ Recreating Cloud Scheduler..."
 gcloud services enable cloudscheduler.googleapis.com
 
 # Delete old scheduler job if exists
-gcloud scheduler jobs delete "$SERVICE_NAME-job" \
+gcloud scheduler jobs delete "$SERVICE_NAME-scheduler" \
   --location="$REGION" \
   --quiet >/dev/null 2>&1 || true
 
 # Create fresh scheduler job
-gcloud scheduler jobs create http "$SERVICE_NAME-job" \
+gcloud scheduler jobs create http "$SERVICE_NAME-scheduler" \
   --schedule="$SCHEDULE" \
   --time-zone="$TIMEZONE" \
   --http-method=POST \
-  --uri="https://${REGION}-run.googleapis.com/apis/run.googleapis.com/v1/namespaces/${GOOGLE_CLOUD_PROJECT}/jobs/${SERVICE_NAME}:run" \
+  --uri="https://${REGION}-run.googleapis.com/apis/run.googleapis.com/v1/namespaces/${PROJECT_ID}/jobs/${SERVICE_NAME}:run" \
   --oidc-service-account-email="$SA_EMAIL" \
   --location="$REGION" \
-  --project="$GOOGLE_CLOUD_PROJECT"
+  --project="$PROJECT_ID"
 
 echo "✅ Cloud Scheduler job created"
 
 echo -e "\n🎉 DEPLOYMENT COMPLETED SUCCESSFULLY!"
 echo "Cloud Run Job: $SERVICE_NAME"
-echo "Scheduler Job: $SERVICE_NAME-job"
+echo "Scheduler Job: $SERVICE_NAME-scheduler"

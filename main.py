@@ -1,22 +1,21 @@
+import json
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime, date
-from dotenv import load_dotenv
+
+import google.auth
 from google.cloud import secretmanager
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
-import os, json
-
 def get_service_account_credentials():
-    load_dotenv()
-    project_id = os.getenv("GOOGLE_CLOUD_PROJECT")
+    _, project_id = google.auth.default()
     client = secretmanager.SecretManagerServiceClient()
     secret = list(client.list_secrets(parent=f"projects/{project_id}"))[0]
     payload = client.access_secret_version(
         name=f"{secret.name}/versions/latest"
     ).payload.data.decode("UTF-8")
-
+    
     return service_account.Credentials.from_service_account_info(
         json.loads(payload),
         scopes=["https://www.googleapis.com/auth/calendar"]

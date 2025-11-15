@@ -20,6 +20,7 @@ Download and install the following:
 - Git and Git Bash: https://git-scm.com/install/
 - Docker Desktop: https://www.docker.com/products/docker-desktop/
 - Python (used 3.13.7): https://www.python.org/downloads/
+- Google Cloud CLI: https://docs.cloud.google.com/sdk/docs/install-sdk
 
 Verify installation:
 
@@ -27,6 +28,7 @@ Verify installation:
 git --version
 docker --version
 python --version
+gcloud --version
 ```
 
 ## 2. GitHub Repository
@@ -64,23 +66,36 @@ deactivate                  # Deactivate the environment
 Create a `.env` file in the project root with the following variables:
 
 ```bash
-GOOGLE_CLOUD_PROJECT="your_project_id"
+PROJECT_ID="your_project_id"
 REGION="your_region"
 SA_NAME="your_service_account_name"
 SECRET_NAME="your_secret_name"
 
 EMAIL="your_email@example.com"
-CALENDAR_NAME="Leeds Grand Mosque Prayer Times"
+CALENDAR_NAME="Masjid Prayer Times"
 
 REPO="prayer-repo"
 IMAGE_NAME="prayer-calendar"
 
-SERVICE_NAME="prayer-calendar-job"
+SERVICE_NAME="prayer-calendar"
 SCHEDULE="0 0 * * *"
 TIMEZONE="Europe/London"
 ```
 
-## 5. Set Up Google Cloud Service Account
+## 5. Authenticate Google Cloud CLI
+
+Before running any setup or deployment scripts, authenticate and set your project:
+
+```bash
+gcloud auth login
+gcloud auth application-default login
+gcloud config set project YOUR_PROJECT_ID
+gcloud config get-value project
+```
+
+Replace `YOUR_PROJECT_ID` with your details.
+
+## 6. Set Up Google Cloud Service Account
 
 Run the service account setup script:
 
@@ -93,7 +108,7 @@ This will:
 - Assign necessary IAM roles
 - Create a secret in Secret Manager
 
-## 6. Set Up Google Calendar
+## 7. Set Up Google Calendar
 
 Run the calendar setup script:
 
@@ -106,7 +121,7 @@ This will:
 - Share it with your configured email
 - Print the subscription link
 
-## 7. Deploy to Google Cloud
+## 8. Deploy to Google Cloud
 
 Deploy the project as a scheduled Cloud Run job:
 
@@ -119,12 +134,26 @@ This will:
 - Deploy or update the Cloud Run job
 - Recreate the Cloud Scheduler job to trigger the Cloud Run job
 
-## 8. Run Locally (Optional)
+## 9. Test the Project
 
-While the virtual environment is active:
+### 9.1 Run Locally
+
+Activate the virtual environment and run the script:
 
 ```bash
+source .venv/bin/activate
 python main.py
 ```
 
-This will scrape the prayer times and create events in your Google Calendar.
+### 9.2 Trigger Cloud Run Job Manually
+
+You can execute the scheduled Cloud Run job anytime using the `.env` variables:
+
+```bash
+source .env
+gcloud run jobs execute $SERVICE_NAME \
+  --region $REGION \
+  --project $PROJECT_ID
+```
+
+These will scrape the prayer times and create events in your Google Calendar.
