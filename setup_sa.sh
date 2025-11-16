@@ -41,7 +41,7 @@ fi
 
 # ---------- 2️⃣ Assign roles ----------
 echo "🔹 Ensuring required roles..."
-for role in roles/run.jobsExecutor roles/secretmanager.secretAccessor roles/secretmanager.viewer; do
+for role in roles/run.jobsExecutor roles/secretmanager.secretAccessor roles/secretmanager.viewer roles/run.invoker; do
   if ! gcloud projects get-iam-policy $PROJECT_ID \
         --flatten="bindings[].members" \
         --format="value(bindings.role)" \
