@@ -21,6 +21,7 @@ Download and install the following:
 - Docker Desktop: https://www.docker.com/products/docker-desktop/
 - Python (used 3.13.7): https://www.python.org/downloads/
 - Google Cloud CLI: https://docs.cloud.google.com/sdk/docs/install-sdk
+- Terraform: https://developer.hashicorp.com/terraform/install
 
 Verify installation:
 
@@ -29,6 +30,7 @@ git --version
 docker --version
 python --version
 gcloud --version
+terraform --version
 ```
 
 ## 2. GitHub Repository
