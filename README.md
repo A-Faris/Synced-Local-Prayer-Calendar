@@ -58,7 +58,7 @@ Create and activate a virtual environment, then install dependencies:
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate   # Activate the environment
+source .venv/Scripts/activate   # Activate the environment
 pip install -r requirements.txt
 deactivate                  # Deactivate the environment
 ```
@@ -68,20 +68,22 @@ deactivate                  # Deactivate the environment
 Create a `.env` file in the project root with the following variables:
 
 ```bash
-PROJECT_ID="your_project_id"
-REGION="your_region"
-SA_NAME="your_service_account_name"
-SECRET_NAME="your_secret_name"
-
 EMAIL="your_email@example.com"
 CALENDAR_NAME="Masjid Prayer Times"
+```
 
-REPO="prayer-repo"
-IMAGE_NAME="prayer-calendar"
+Create a `terraform.tfvars` file in the project root with the following variables:
 
-SERVICE_NAME="prayer-calendar"
-SCHEDULE="0 0 * * *"
-TIMEZONE="Europe/London"
+```hcl
+project_id  = "your_project_id"
+region      = "your_region"
+sa_name     = "your_service_account_name"
+secret_name = "your_secret_name"
+repo        = "your_repo_name"
+image_name  = "your_image_name"
+service_name= "your_service_name"
+schedule    = "* * * * *"
+timezone    = "your_timezone"
 ```
 
 ## 5. Authenticate Google Cloud CLI
@@ -97,18 +99,22 @@ gcloud config get-value project
 
 Replace `YOUR_PROJECT_ID` with your details.
 
-## 6. Set Up Google Cloud Service Account
+## 6. Deploy Google Cloud Infrastructure with Terraform
 
-Run the service account setup script:
+Run the terraform script:
 
 ```bash
-bash setup_sa.sh
+terraform plan
+terraform apply
 ```
 
 This will:
-- Create the service account (if it doesn’t exist)
+- Create the service account
 - Assign necessary IAM roles
-- Create a secret in Secret Manager
+- Store service account key in Secret Manager
+- Build and push the Docker image to Artifact Registry
+- Create the Cloud Run job
+- Create the Cloud Scheduler to trigger the Cloud Run job
 
 ## 7. Set Up Google Calendar
 
@@ -123,22 +129,9 @@ This will:
 - Share it with your configured email
 - Print the subscription link
 
-## 8. Deploy to Google Cloud
+## 8. Test the Project
 
-Deploy the project as a scheduled Cloud Run job:
-
-```bash
-bash deploy.sh
-```
-
-This will:
-- Build and push the Docker image
-- Deploy or update the Cloud Run job
-- Recreate the Cloud Scheduler job to trigger the Cloud Run job
-
-## 9. Test the Project
-
-### 9.1 Run Locally
+### 8.1 Run Locally
 
 Activate the virtual environment and run the script:
 
@@ -147,7 +140,7 @@ source .venv/bin/activate
 python main.py
 ```
 
-### 9.2 Trigger Cloud Run Job Manually
+### 8.2 Trigger Cloud Run Job Manually
 
 You can execute the scheduled Cloud Run job anytime using the `.env` variables:
 
@@ -160,10 +153,6 @@ gcloud run jobs execute $SERVICE_NAME \
 
 These will scrape the prayer times and create events in your Google Calendar.
 
-## Google Calendar Links
-
-You can view or subscribe to the Leeds Grand Mosque Prayer Times calendar:
-
-- **View Live Calendar:** [Open Calendar](https://calendar.google.com/calendar/u/0/embed?src=3b62801c6ae1b791769131be4e222cb93fcb59a55e997cd4a6a2b1bed5e86253@group.calendar.google.com&ctz=Europe/London)
-- **Subscribe to Calendar:** [Subscribe Link](https://calendar.google.com/calendar/u/0/r?cid=3b62801c6ae1b791769131be4e222cb93fcb59a55e997cd4a6a2b1bed5e86253@group.calendar.google.com)
-- **iCal Subscription:** [Download .ics](https://calendar.google.com/calendar/ical/3b62801c6ae1b791769131be4e222cb93fcb59a55e997cd4a6a2b1bed5e86253%40group.calendar.google.com/public/basic.ics)
+- **View Live Calendar:** [Open Calendar](https://calendar.google.com/calendar/embed?src=80110e3124bdedfb7a61d57c33bfd69a3a2ee799c89ff186a3a5ee5850edf0bc%40group.calendar.google.com&ctz=Europe%2FLondon)
+- **Subscribe to Calendar:** [Subscribe Link](https://calendar.google.com/calendar/u/0/r?cid=80110e3124bdedfb7a61d57c33bfd69a3a2ee799c89ff186a3a5ee5850edf0bc@group.calendar.google.com)
+- **iCal Subscription (for non-Google calendars):** [Download .ics](https://calendar.google.com/calendar/ical/80110e3124bdedfb7a61d57c33bfd69a3a2ee799c89ff186a3a5ee5850edf0bc%40group.calendar.google.com/public/basic.ics)

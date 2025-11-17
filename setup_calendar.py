@@ -41,4 +41,7 @@ if __name__ == "__main__":
     calendar_id = get_or_create_calendar(service, CALENDAR_NAME)
     share_calendar(service, calendar_id, EMAIL)
 
-    print(f"🔗 Subscribe: https://calendar.google.com/calendar/u/0/r?cid={calendar_id}")
+    print(f"🔗 View Live Calendar: https://calendar.google.com/calendar/embed?src={calendar_id}&ctz=Europe%2FLondon")
+    print(f"🔗 Subscribe to Calendar: https://calendar.google.com/calendar/u/0/r?cid={calendar_id}")
+    print(f"🔗 iCal Subscription: https://calendar.google.com/calendar/ical/{calendar_id}/public/basic.ics")
+    
