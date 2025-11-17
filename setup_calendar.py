@@ -1,13 +1,14 @@
 import os, json
 from dotenv import load_dotenv
 
+import google.auth
 from google.cloud import secretmanager
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
-def get_service_account_credentials(PROJECT_ID):
+def get_service_account_credentials(project_id):
     client = secretmanager.SecretManagerServiceClient()
-    secret = list(client.list_secrets(parent=f"projects/{PROJECT_ID}"))[0]
+    secret = list(client.list_secrets(parent=f"projects/{project_id}"))[0]
     payload = client.access_secret_version(name=f"{secret.name}/versions/latest").payload.data.decode("UTF-8")
     return service_account.Credentials.from_service_account_info(
         json.loads(payload),
@@ -32,11 +33,11 @@ def share_calendar(service, calendar_id, email):
 
 if __name__ == "__main__":
     load_dotenv()
-    PROJECT_ID = os.getenv("PROJECT_ID")
     EMAIL = os.getenv("EMAIL")
     CALENDAR_NAME = os.getenv("CALENDAR_NAME")
+    _, project_id = google.auth.default()
 
-    service = build("calendar", "v3", credentials=get_service_account_credentials(PROJECT_ID))
+    service = build("calendar", "v3", credentials=get_service_account_credentials(project_id))
     calendar_id = get_or_create_calendar(service, CALENDAR_NAME)
     share_calendar(service, calendar_id, EMAIL)
 
