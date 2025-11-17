@@ -12,7 +12,7 @@ This project scrapes daily prayer times from the Leeds Grand Mosque website and 
 
 ## Architecture Diagram
 
-<img width="1696" height="1301" alt="Prayer Times Architecture Diagram" src="https://github.com/user-attachments/assets/ab8af509-92c0-4509-ad5d-bf85de745483" />
+<img width="1696" height="1301" alt="Prayer Times Architecture Diagram" src="https://github.com/user-attachments/assets/edadaa40-591c-44a0-b42d-77795ee247c9" />
 
 ## 1. Install Required Tools
 
