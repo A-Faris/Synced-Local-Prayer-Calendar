@@ -1,5 +1,9 @@
 # Prayer Times to Google Calendar
 
+## Introduction
+
+Muslims pray five times a day and the exact prayer times change daily based on location and astronomical calculations. Many people regularly check their local masjid’s website or timetable to stay updated. This project aims to simplify that daily routine by automatically collecting prayer times from the Leeds Grand Mosque and publishing them to a public Google Calendar. Anyone can subscribe to the calendar and instantly receive accurate, daily prayer times across all their devices without needing to manually check or update anything.
+
 ## Overview
 
 This project scrapes daily prayer times from the Leeds Grand Mosque website and updates a Google Calendar. Users can subscribe to this calendar to view daily prayer schedules on any device.
@@ -12,7 +16,7 @@ This project scrapes daily prayer times from the Leeds Grand Mosque website and 
 
 ## Architecture Diagram
 
-<img width="1696" height="1301" alt="Prayer Times Architecture Diagram" src="https://github.com/user-attachments/assets/ab8af509-92c0-4509-ad5d-bf85de745483" />
+<img width="1696" height="1301" alt="Prayer Times Architecture Diagram" src="https://github.com/user-attachments/assets/edadaa40-591c-44a0-b42d-77795ee247c9" />
 
 ## 1. Install Required Tools
 
