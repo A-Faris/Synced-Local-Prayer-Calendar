@@ -21,8 +21,8 @@ def get_service_account_credentials():
         scopes=["https://www.googleapis.com/auth/calendar"]
     )
 
-def find_prayer_times(url):
-    soup = BeautifulSoup(requests.get(url).text, "html.parser")
+def get_LGM_prayer_times():
+    soup = BeautifulSoup(requests.get("https://www.leedsgrandmosque.com/").text, "html.parser")
     return {
         prayer.find(class_="prayer-name").text.capitalize():
         prayer.find(class_="date").text
@@ -42,7 +42,8 @@ def create_event(service, calendar_id, prayer, time):
 if __name__ == "__main__":
     service = build('calendar', 'v3', credentials=get_service_account_credentials())
 
-    calendar_id = service.calendarList().list().execute().get('items', [])[0]['id']
-
-    for prayer, time in find_prayer_times("https://www.leedsgrandmosque.com/").items():
-        create_event(service, calendar_id, prayer, time)
+    calendars = service.calendarList().list().execute().get('items', [])
+    for calendar in calendars:
+        if calendar['summary'] == "Leeds Grand Mosque Prayer Times":
+            for prayer, time in get_LGM_prayer_times().items():
+                create_event(service, calendar['id'], prayer, time)

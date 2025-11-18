@@ -15,14 +15,13 @@ def get_service_account_credentials(project_id):
         scopes=["https://www.googleapis.com/auth/calendar"]
     )
 
-def get_or_create_calendar(service, CALENDAR_NAME):
+def create_or_get_calendar_id(service, calendar_name, timezone="Europe/London"):
     calendars = service.calendarList().list().execute().get("items", [])
-    if calendars:
-        service.calendars().patch(calendarId=calendars[0]["id"], body={"summary": CALENDAR_NAME}).execute()
-        print(f"✅ Updated calendar name to: {CALENDAR_NAME}")
-        return calendars[0]["id"]
+    for calendar in calendars:
+        if calendar_name in calendar["summary"]:
+            return calendar["id"]
 
-    calendar_id = service.calendars().insert(body={"summary": CALENDAR_NAME, "timeZone": "Europe/London"}).execute()["id"]
+    calendar_id = service.calendars().insert(body={"summary": calendar_name, "timeZone": timezone}).execute()["id"]
     service.acl().insert(calendarId=calendar_id, body={"role": "reader", "scope": {"type": "default"}}).execute()
     print(f"✅ Created new public calendar: {calendar_id}")
     return calendar_id
@@ -33,15 +32,17 @@ def share_calendar(service, calendar_id, email):
 
 if __name__ == "__main__":
     load_dotenv()
-    EMAIL = os.getenv("EMAIL")
+    EMAILS = os.getenv("EMAILS").split(", ")
     CALENDAR_NAME = os.getenv("CALENDAR_NAME")
+    TIMEZONE = os.getenv("TIMEZONE", "Europe/London")
     _, project_id = google.auth.default()
 
     service = build("calendar", "v3", credentials=get_service_account_credentials(project_id))
-    calendar_id = get_or_create_calendar(service, CALENDAR_NAME)
-    share_calendar(service, calendar_id, EMAIL)
+    calendar_id = create_or_get_calendar_id(service, CALENDAR_NAME, TIMEZONE)
+    # for EMAIL in EMAILS:
+    #     share_calendar(service, calendar_id, EMAIL)
 
-    print(f"🔗 View Live Calendar: https://calendar.google.com/calendar/embed?src={calendar_id}&ctz=Europe%2FLondon")
+    print(f"🔗 View Live Calendar: https://calendar.google.com/calendar/embed?src={calendar_id}")
     print(f"🔗 Subscribe to Calendar: https://calendar.google.com/calendar/u/0/r?cid={calendar_id}")
-    print(f"🔗 iCal Subscription: https://calendar.google.com/calendar/ical/{calendar_id}/public/basic.ics")
+    print(f"🔗 iCal Subscription (for non-Google calendars): https://calendar.google.com/calendar/ical/{calendar_id}/public/basic.ics")
     
