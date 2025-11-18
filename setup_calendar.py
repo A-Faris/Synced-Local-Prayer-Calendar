@@ -29,23 +29,19 @@ def get_calendar_id(service, calendar_name, timezone="Europe/London"):
         
     return create_calendar_id(service, calendar_name, timezone)
 
-def share_calendar(service, calendar_id, email):
-    service.acl().insert(calendarId=calendar_id, body={"role": "reader", "scope": {"type": "user", "value": email}}).execute()
-    print(f"✅ Calendar is shared with {email}")
-
 if __name__ == "__main__":
     load_dotenv()
-    EMAILS = os.getenv("EMAILS").split(", ")
-    CALENDAR_NAME = os.getenv("CALENDAR_NAME")
+    CALENDAR_NAMES = os.getenv("CALENDAR_NAME").split(", ")
     TIMEZONE = os.getenv("TIMEZONE", "Europe/London")
     _, project_id = google.auth.default()
 
     service = build("calendar", "v3", credentials=get_service_account_credentials(project_id))
-    calendar_id = get_calendar_id(service, CALENDAR_NAME, TIMEZONE)
-    for EMAIL in EMAILS:
-        share_calendar(service, calendar_id, EMAIL)
-
-    print(f"📅 View Live Calendar: https://calendar.google.com/calendar/embed?src={calendar_id}")
-    print(f"🔗 Subscribe to Calendar: https://calendar.google.com/calendar/u/0/r?cid={calendar_id}")
-    print(f"🔗 iCal Subscription (for non-Google calendars): https://calendar.google.com/calendar/ical/{calendar_id}/public/basic.ics")
+    
+    for CALENDAR_NAME in CALENDAR_NAMES:
+        print(f"\n🕌 {CALENDAR_NAME}\n")
+        calendar_id = get_calendar_id(service, CALENDAR_NAME, TIMEZONE)
+        
+        print(f"📅 View Live Calendar: https://calendar.google.com/calendar/embed?src={calendar_id}")
+        print(f"🔗 Subscribe to Calendar: https://calendar.google.com/calendar/u/0/r?cid={calendar_id}")
+        print(f"🔗 iCal Subscription (for non-Google calendars): https://calendar.google.com/calendar/ical/{calendar_id}/public/basic.ics")
     
