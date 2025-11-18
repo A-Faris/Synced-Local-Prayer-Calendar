@@ -15,19 +15,22 @@ def get_service_account_credentials(project_id):
         scopes=["https://www.googleapis.com/auth/calendar"]
     )
 
-def create_or_get_calendar_id(service, calendar_name, timezone="Europe/London"):
-    calendars = service.calendarList().list().execute().get("items", [])
-    for calendar in calendars:
-        if calendar_name in calendar["summary"]:
-            return calendar["id"]
-
+def create_calendar_id(service, calendar_name, timezone="Europe/London"):
     calendar_id = service.calendars().insert(body={"summary": calendar_name, "timeZone": timezone}).execute()["id"]
     service.acl().insert(calendarId=calendar_id, body={"role": "reader", "scope": {"type": "default"}}).execute()
     print(f"✅ Created new public calendar: {calendar_id}")
     return calendar_id
 
+def get_calendar_id(service, calendar_name, timezone="Europe/London"):
+    calendars = service.calendarList().list().execute().get("items", [])
+    for calendar in calendars:
+        if calendar_name in calendar["summary"]:
+            return calendar["id"]
+        
+    return create_calendar_id(service, calendar_name, timezone)
+
 def share_calendar(service, calendar_id, email):
-    service.acl().insert(calendarId=calendar_id, body={"role": "writer", "scope": {"type": "user", "value": email}}).execute()
+    service.acl().insert(calendarId=calendar_id, body={"role": "reader", "scope": {"type": "user", "value": email}}).execute()
     print(f"✅ Calendar is shared with {email}")
 
 if __name__ == "__main__":
@@ -38,11 +41,11 @@ if __name__ == "__main__":
     _, project_id = google.auth.default()
 
     service = build("calendar", "v3", credentials=get_service_account_credentials(project_id))
-    calendar_id = create_or_get_calendar_id(service, CALENDAR_NAME, TIMEZONE)
-    # for EMAIL in EMAILS:
-    #     share_calendar(service, calendar_id, EMAIL)
+    calendar_id = get_calendar_id(service, CALENDAR_NAME, TIMEZONE)
+    for EMAIL in EMAILS:
+        share_calendar(service, calendar_id, EMAIL)
 
-    print(f"🔗 View Live Calendar: https://calendar.google.com/calendar/embed?src={calendar_id}")
+    print(f"📅 View Live Calendar: https://calendar.google.com/calendar/embed?src={calendar_id}")
     print(f"🔗 Subscribe to Calendar: https://calendar.google.com/calendar/u/0/r?cid={calendar_id}")
     print(f"🔗 iCal Subscription (for non-Google calendars): https://calendar.google.com/calendar/ical/{calendar_id}/public/basic.ics")
     
