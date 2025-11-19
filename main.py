@@ -41,6 +41,10 @@ def get_MWHS_prayer_times():
         "Isha": response[4],
     }
 
+def get_Mcdougall_prayer_times():
+    soup = BeautifulSoup(requests.get("https://www.manchesterisoc.com/").text, "html.parser")
+    return {i.text: i.next_sibling.text for i in soup.find_all(class_="prayerName")[:6]}
+ 
 def create_calendar_id(service, calendar_name, timezone="Europe/London"):
     calendar_id = service.calendars().insert(body={"summary": calendar_name, "timeZone": timezone}).execute()["id"]
     service.acl().insert(calendarId=calendar_id, body={"role": "reader", "scope": {"type": "default"}}).execute()
@@ -85,7 +89,8 @@ def share_calendar(service, calendar_id, email):
 if __name__ == "__main__":
     MASJIDS = {
         "Leeds Grand Mosque": get_LGM_prayer_times,
-        "Muslim Welfare House Sheffield": get_MWHS_prayer_times
+        "Muslim Welfare House Sheffield": get_MWHS_prayer_times,
+        "Mcdougall Prayer Hall": get_Mcdougall_prayer_times,
     }
 
     service = build('calendar', 'v3', credentials=get_service_account_credentials())
