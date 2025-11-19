@@ -189,17 +189,15 @@ resource "null_resource" "docker_build" {
   }
 
   triggers = {
-    image_uri = local.image_uri
+    image_uri       = local.image_uri
+    main_hash       = filesha256("${path.module}/main.py")
+    dockerfile_hash = filesha256("${path.module}/Dockerfile")
   }
 }
 
 resource "null_resource" "docker_push" {
   provisioner "local-exec" {
     command = "docker push ${local.image_uri}"
-  }
-
-  triggers = {
-    image_uri = local.image_uri
   }
 
   depends_on = [
