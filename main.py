@@ -21,29 +21,30 @@ def get_service_account_credentials():
         scopes=["https://www.googleapis.com/auth/calendar"]
     )
 
+def convert_to_dt(time_str, format="%H:%M"):
+    return datetime.combine(date.today(), datetime.strptime(time_str, format).time()).isoformat()
+
 def get_LGM_prayer_times():
     soup = BeautifulSoup(requests.get("https://www.leedsgrandmosque.com/").text, "html.parser")
-    return {
-        prayer.find(class_="prayer-name").text.capitalize():
-        prayer.find(class_="date").text
-        for prayer in soup.find(class_="prayers-list").find_all("li")
-    }
+    return {i.text.title():convert_to_dt(i.find_next_sibling().text)
+            for i in soup.find_all(class_="prayer-name")}
 
 def get_MWHS_prayer_times():
     response = requests.get("https://docs.google.com/spreadsheets/d/e/2PACX-1vQCLtCIx0MMIyqrgmxcLHYYAAc8kWBeG4_pRNJyF3CRavIdmFjzqpyTrGHBM35wL238McSb5CT59VB0/pub?gid=1620370804&single=true&output=csv").text.splitlines()
     response2 = requests.get("https://docs.google.com/spreadsheets/d/e/2PACX-1vQCLtCIx0MMIyqrgmxcLHYYAAc8kWBeG4_pRNJyF3CRavIdmFjzqpyTrGHBM35wL238McSb5CT59VB0/pub?gid=1368650003&single=true&output=csv").text.splitlines()
     return {
-        "Fajr": response[0],
-        "Shurooq": response2[1],
-        "Dhuhr": response[1],
-        "Asr": response[2],
-        "Maghrib": response[3],
-        "Isha": response[4],
+        "Fajr": convert_to_dt(response[0]),
+        "Shurooq": convert_to_dt(response2[1]),
+        "Dhuhr": convert_to_dt(response[1]),
+        "Asr": convert_to_dt(response[2]),
+        "Maghrib": convert_to_dt(response[3]),
+        "Isha": convert_to_dt(response[4]),
     }
 
 def get_Mcdougall_prayer_times():
     soup = BeautifulSoup(requests.get("https://www.manchesterisoc.com/").text, "html.parser")
-    return {i.text: i.next_sibling.text for i in soup.find_all(class_="prayerName")[:6]}
+    return {i.text: convert_to_dt(i.next_sibling.text, "%H:%M %p")
+            for i in soup.find_all(class_="prayerName")[:6]}
  
 def create_calendar_id(service, calendar_name, timezone="Europe/London"):
     calendar_id = service.calendars().insert(body={"summary": calendar_name, "timeZone": timezone}).execute()["id"]
@@ -73,11 +74,10 @@ def create_event(service, calendar_id, prayer, time):
         print(f"⏩ Skipping existing event: {prayer} at {time}")
         return
     
-    dt = datetime.combine(date.today(), datetime.strptime(time, "%H:%M").time())
     event = {
         "summary": prayer,
-        "start": {"dateTime": dt.isoformat(), "timeZone": "Europe/London"},
-        "end": {"dateTime": dt.isoformat(), "timeZone": "Europe/London"},
+        "start": {"dateTime": time, "timeZone": "Europe/London"},
+        "end": {"dateTime": time, "timeZone": "Europe/London"},
     }
     created = service.events().insert(calendarId=calendar_id, body=event).execute()
     print("Event created:", created.get('htmlLink'))
