@@ -29,6 +29,18 @@ def get_LGM_prayer_times():
         for prayer in soup.find(class_="prayers-list").find_all("li")
     }
 
+def get_MWHS_prayer_times():
+    response = requests.get("https://docs.google.com/spreadsheets/d/e/2PACX-1vQCLtCIx0MMIyqrgmxcLHYYAAc8kWBeG4_pRNJyF3CRavIdmFjzqpyTrGHBM35wL238McSb5CT59VB0/pub?gid=1620370804&single=true&output=csv").text.splitlines()
+    response2 = requests.get("https://docs.google.com/spreadsheets/d/e/2PACX-1vQCLtCIx0MMIyqrgmxcLHYYAAc8kWBeG4_pRNJyF3CRavIdmFjzqpyTrGHBM35wL238McSb5CT59VB0/pub?gid=1368650003&single=true&output=csv").text.splitlines()
+    return {
+        "Fajr": response[0],
+        "Shurooq": response2[1],
+        "Dhuhr": response[1],
+        "Asr": response[2],
+        "Maghrib": response[3],
+        "Isha": response[4],
+    }
+
 def create_calendar_id(service, calendar_name, timezone="Europe/London"):
     calendar_id = service.calendars().insert(body={"summary": calendar_name, "timeZone": timezone}).execute()["id"]
     service.acl().insert(calendarId=calendar_id, body={"role": "reader", "scope": {"type": "default"}}).execute()
@@ -71,7 +83,10 @@ def share_calendar(service, calendar_id, email):
     print(f"✅ Calendar is shared with {email}")
 
 if __name__ == "__main__":
-    MASJIDS = {"Leeds Grand Mosque": get_LGM_prayer_times}
+    MASJIDS = {
+        "Leeds Grand Mosque": get_LGM_prayer_times,
+        "Muslim Welfare House Sheffield": get_MWHS_prayer_times
+    }
 
     service = build('calendar', 'v3', credentials=get_service_account_credentials())
 
@@ -84,6 +99,6 @@ if __name__ == "__main__":
         for prayer, time in prayer_times.items():
             create_event(service, calendar_id, prayer, time)
 
-        print(f"📅 View Live Calendar: https://calendar.google.com/calendar/embed?src={calendar_id}")
+        print(f"\n📅 View Live Calendar: https://calendar.google.com/calendar/embed?src={calendar_id}")
         print(f"🔗 Subscribe to Calendar: https://calendar.google.com/calendar/u/0/r?cid={calendar_id}")
         print(f"🔗 iCal Subscription (for non-Google calendars): https://calendar.google.com/calendar/ical/{calendar_id}/public/basic.ics")
