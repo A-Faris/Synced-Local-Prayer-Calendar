@@ -200,6 +200,12 @@ resource "null_resource" "docker_push" {
     command = "docker push ${local.image_uri}"
   }
 
+  triggers = {
+    image_uri       = local.image_uri
+    main_hash       = filesha256("${path.module}/main.py")
+    dockerfile_hash = filesha256("${path.module}/Dockerfile")
+  }
+
   depends_on = [
     null_resource.docker_build,
     google_artifact_registry_repository.docker_repo

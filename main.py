@@ -43,7 +43,7 @@ def get_MWHS_prayer_times():
 
 def get_Mcdougall_prayer_times():
     soup = BeautifulSoup(requests.get("https://www.manchesterisoc.com/").text, "html.parser")
-    return {i.text: convert_to_dt(i.next_sibling.text, "%H:%M %p")
+    return {i.text: convert_to_dt(i.next_sibling.text, "%I:%M %p")
             for i in soup.find_all(class_="prayerName")[:6]}
  
 def create_calendar_id(service, calendar_name, timezone="Europe/London"):
@@ -98,7 +98,7 @@ if __name__ == "__main__":
     for masjid, get_prayer_times in MASJIDS.items():
         calendar_name = f"{masjid} Prayer Times"
         print(f"\n🕌 {calendar_name}\n")
-
+        
         calendar_id = get_calendar_id(service, calendar_name)
         prayer_times = get_prayer_times()
         for prayer, time in prayer_times.items():
