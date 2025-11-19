@@ -6,10 +6,10 @@ Muslims pray five times a day and the exact prayer times change daily based on l
 
 ## Supported Mosques
 
-| Mosque                         | Location  | Website                           |
-| ------------------------------ | --------- | --------------------------------- |
-| Leeds Grand Mosque             | Leeds     | https://www.leedsgrandmosque.com/ |
-| Muslim Welfare House Sheffield | Sheffield | https://www.mwhs.org.uk/          |
+| 🕌 Mosque                                                 | 🗺️ Location  | 📅 View Calendar                       | ➕ Add to Google Calendar      | ➕ Add to Other Calendar      |
+| --------------------------------------------------------- | ------------- | --------------------------------- | --------------------- | -------------------------------------------- |
+| <img src="https://www.leedsgrandmosque.com/favicon.ico" width="15"/> [Leeds Grand Mosque](https://www.leedsgrandmosque.com/)   | Leeds         | [View](https://calendar.google.com/calendar/embed?src=80110e3124bdedfb7a61d57c33bfd69a3a2ee799c89ff186a3a5ee5850edf0bc%40group.calendar.google.com&ctz=Europe%2FLondon) | [Subscribe](https://calendar.google.com/calendar/u/0/r?cid=80110e3124bdedfb7a61d57c33bfd69a3a2ee799c89ff186a3a5ee5850edf0bc@group.calendar.google.com) | [Download .ics](https://calendar.google.com/calendar/ical/80110e3124bdedfb7a61d57c33bfd69a3a2ee799c89ff186a3a5ee5850edf0bc%40group.calendar.google.com/public/basic.ics) |
+| <img src="https://mwhs.org.uk/favicon.ico" width="15"/> [Muslim Welfare House Sheffield](https://www.mwhs.org.uk/)| Sheffield     | [View](https://calendar.google.com/calendar/embed?src=2c41d01d3eba036595b9f9ffbc4d4df06b13c37c4da73962a06a0c3e920bb826@group.calendar.google.com) | [Subscribe](https://calendar.google.com/calendar/u/0/r?cid=2c41d01d3eba036595b9f9ffbc4d4df06b13c37c4da73962a06a0c3e920bb826@group.calendar.google.com) | [Download .ics](https://calendar.google.com/calendar/ical/2c41d01d3eba036595b9f9ffbc4d4df06b13c37c4da73962a06a0c3e920bb826@group.calendar.google.com/public/basic.ics) |
 
 ## Architecture Diagram
 
@@ -138,7 +138,3 @@ This will:
 - Scrape prayer times
 - Create or update Google Calendar events
 - Print subscription links
-
-- **View Live Calendar:** [Open Calendar](https://calendar.google.com/calendar/embed?src=80110e3124bdedfb7a61d57c33bfd69a3a2ee799c89ff186a3a5ee5850edf0bc%40group.calendar.google.com&ctz=Europe%2FLondon)
-- **Subscribe to Calendar:** [Subscribe Link](https://calendar.google.com/calendar/u/0/r?cid=80110e3124bdedfb7a61d57c33bfd69a3a2ee799c89ff186a3a5ee5850edf0bc@group.calendar.google.com)
-- **iCal Subscription (for non-Google calendars):** [Download .ics](https://calendar.google.com/calendar/ical/80110e3124bdedfb7a61d57c33bfd69a3a2ee799c89ff186a3a5ee5850edf0bc%40group.calendar.google.com/public/basic.ics)
