@@ -4,9 +4,16 @@
 
 Muslims pray five times a day and the exact prayer times change daily based on location and astronomical calculations. Many people regularly check their local masjid’s website or timetable to stay updated. This project aims to simplify that daily routine by automatically collecting prayer times from local mosques and publishing them to a public Google Calendar. Anyone can subscribe to the calendar and instantly receive accurate, daily prayer times across all their devices.
 
+## Supported Mosques
+
+| Mosque                         | Location  | Website                           |
+| ------------------------------ | --------- | --------------------------------- |
+| Leeds Grand Mosque             | Leeds     | https://www.leedsgrandmosque.com/ |
+| Muslim Welfare House Sheffield | Sheffield | https://www.mwhs.org.uk/          |
+
 ## Architecture Diagram
 
-<img width="1696" height="1301" alt="Prayer Times Architecture Diagram" src="https://github.com/user-attachments/assets/edadaa40-591c-44a0-b42d-77795ee247c9" />
+<img width="1696" height="1301" alt="Prayer Times Architecture Diagram" src="https://github.com/user-attachments/assets/262b11d9-0f22-476c-ab1b-d0093e11748e" />
 
 ### Initial Setup (Terraform)
 
@@ -25,13 +32,6 @@ Once deployed, everything runs automatically:
 - Cloud Run Job retrieves service account credentials from Secret Manager
 - Prayer times are scraped from mosque websites
 - Google Calendar Prayer Times are updated for each mosque
-
-## Supported Mosques
-
-| Mosque                         | Location  | Website                           |
-| ------------------------------ | --------- | --------------------------------- |
-| Leeds Grand Mosque             | Leeds     | https://www.leedsgrandmosque.com/ |
-| Muslim Welfare House Sheffield | Sheffield | https://www.mwhs.org.uk/          |
 
 ## 1. Install Required Tools
 
