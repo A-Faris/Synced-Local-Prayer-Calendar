@@ -8,7 +8,7 @@ from google.cloud import secretmanager
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
-def get_service_account_credentials():
+def get_service_account_credentials() -> service_account.Credentials:
     _, project_id = google.auth.default()
     client = secretmanager.SecretManagerServiceClient()
     secret = list(client.list_secrets(parent=f"projects/{project_id}"))[0]
@@ -21,15 +21,15 @@ def get_service_account_credentials():
         scopes=["https://www.googleapis.com/auth/calendar"]
     )
 
-def convert_to_dt(time_str, format="%H:%M"):
+def convert_to_dt(time_str: str, format: str = "%H:%M") -> datetime:
     return datetime.combine(date.today(), datetime.strptime(time_str, format).time()).isoformat()
 
-def get_LGM_prayer_times():
+def get_LGM_prayer_times() -> dict[str, datetime]:
     soup = BeautifulSoup(requests.get("https://www.leedsgrandmosque.com/").text, "html.parser")
     return {i.text.title():convert_to_dt(i.find_next_sibling().text)
             for i in soup.find_all(class_="prayer-name")}
 
-def get_MWHS_prayer_times():
+def get_MWHS_prayer_times() -> dict[str, datetime]:
     response = requests.get("https://docs.google.com/spreadsheets/d/e/2PACX-1vQCLtCIx0MMIyqrgmxcLHYYAAc8kWBeG4_pRNJyF3CRavIdmFjzqpyTrGHBM35wL238McSb5CT59VB0/pub?gid=1620370804&single=true&output=csv").text.splitlines()
     response2 = requests.get("https://docs.google.com/spreadsheets/d/e/2PACX-1vQCLtCIx0MMIyqrgmxcLHYYAAc8kWBeG4_pRNJyF3CRavIdmFjzqpyTrGHBM35wL238McSb5CT59VB0/pub?gid=1368650003&single=true&output=csv").text.splitlines()
     return {
@@ -41,18 +41,18 @@ def get_MWHS_prayer_times():
         "Isha": convert_to_dt(response[4]),
     }
 
-def get_Mcdougall_prayer_times():
+def get_Mcdougall_prayer_times() -> dict[str, datetime]:
     soup = BeautifulSoup(requests.get("https://www.manchesterisoc.com/").text, "html.parser")
     return {i.text: convert_to_dt(i.next_sibling.text, "%I:%M %p")
             for i in soup.find_all(class_="prayerName")[:6]}
  
-def create_calendar_id(service, calendar_name, timezone="Europe/London"):
+def create_calendar_id(service: service_account.Credentials, calendar_name: str, timezone: str = "Europe/London") -> str:
     calendar_id = service.calendars().insert(body={"summary": calendar_name, "timeZone": timezone}).execute()["id"]
     service.acl().insert(calendarId=calendar_id, body={"role": "reader", "scope": {"type": "default"}}).execute()
     print(f"✅ Created new public calendar: {calendar_id}")
     return calendar_id
 
-def get_calendar_id(service, calendar_name, timezone="Europe/London"):
+def get_calendar_id(service: service_account.Credentials, calendar_name: str, timezone: str = "Europe/London") -> str:
     calendars = service.calendarList().list().execute().get("items", [])
     for calendar in calendars:
         if calendar_name in calendar["summary"]:
@@ -60,7 +60,7 @@ def get_calendar_id(service, calendar_name, timezone="Europe/London"):
         
     return create_calendar_id(service, calendar_name, timezone)
 
-def event_exists(service, calendar_id, prayer):
+def event_exists(service: service_account.Credentials, calendar_id: str, prayer: str) -> bool:
     return bool(service.events().list(
         calendarId=calendar_id,
         timeMin=datetime.combine(date.today(), datetime.min.time()).isoformat() + "Z",
@@ -69,7 +69,7 @@ def event_exists(service, calendar_id, prayer):
         q=prayer
     ).execute().get("items", []))
 
-def create_event(service, calendar_id, prayer, time):
+def create_event(service: service_account.Credentials, calendar_id: str, prayer: str, time: datetime) -> None:
     if event_exists(service, calendar_id, prayer):
         print(f"⏩ Skipping existing event: {prayer} at {time}")
         return
@@ -82,7 +82,7 @@ def create_event(service, calendar_id, prayer, time):
     created = service.events().insert(calendarId=calendar_id, body=event).execute()
     print("Event created:", created.get('htmlLink'))
 
-def share_calendar(service, calendar_id, email):
+def share_calendar(service: service_account.Credentials, calendar_id: str, email: str) -> None:
     service.acl().insert(calendarId=calendar_id, body={"role": "reader", "scope": {"type": "user", "value": email}}).execute()
     print(f"✅ Calendar is shared with {email}")
 
