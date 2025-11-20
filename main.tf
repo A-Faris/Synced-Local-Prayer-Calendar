@@ -105,36 +105,28 @@ resource "google_service_account" "prayer_scraper_sa" {
 
 # ============ IAM ROLES ============
 
-resource "google_project_iam_member" "run_jobs_executor" {
+locals {
+  iam_roles = [
+    "roles/artifactregistry.writer",
+    "roles/run.admin",
+    "roles/secretmanager.secretAccessor"
+  ]
+}
+
+resource "google_project_iam_member" "sa_roles" {
+  for_each = toset(local.iam_roles)
+
   project = var.project_id
-  role    = "roles/run.jobsExecutor"
+  role    = each.value
   member  = "serviceAccount:${google_service_account.prayer_scraper_sa.email}"
 
   depends_on = [google_service_account.prayer_scraper_sa]
 }
 
-resource "google_project_iam_member" "secret_accessor" {
-  project = var.project_id
-  role    = "roles/secretmanager.secretAccessor"
-  member  = "serviceAccount:${google_service_account.prayer_scraper_sa.email}"
-
-  depends_on = [google_service_account.prayer_scraper_sa]
-}
-
-resource "google_project_iam_member" "secret_viewer" {
-  project = var.project_id
-  role    = "roles/secretmanager.viewer"
-  member  = "serviceAccount:${google_service_account.prayer_scraper_sa.email}"
-
-  depends_on = [google_service_account.prayer_scraper_sa]
-}
-
-resource "google_project_iam_member" "run_invoker" {
-  project = var.project_id
-  role    = "roles/run.invoker"
-  member  = "serviceAccount:${google_service_account.prayer_scraper_sa.email}"
-
-  depends_on = [google_service_account.prayer_scraper_sa]
+resource "google_service_account_iam_member" "allow_act_as" {
+  service_account_id = google_service_account.prayer_scraper_sa.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${google_service_account.prayer_scraper_sa.email}"
 }
 
 # ============ SERVICE ACCOUNT KEY ============
