@@ -39,3 +39,9 @@ jobs:
         --image="$IMAGE_URI" \
         --region="${{ secrets.GCP_REGION }}" \
         --project="${{ secrets.GCP_PROJECT }}"
+
+    - name: Run Cloud Run Job
+      run: |
+        gcloud run jobs execute "${{ secrets.CLOUD_RUN_JOB_NAME }}" \
+        --region="${{ secrets.GCP_REGION }}" \
+        --project="${{ secrets.GCP_PROJECT }}"
