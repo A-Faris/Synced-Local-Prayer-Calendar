@@ -181,37 +181,6 @@ resource "google_artifact_registry_repository" "docker_repo" {
   depends_on = [google_secret_manager_secret_version.sa_key_version]
 }
 
-# ============ DOCKER ============
-
-resource "null_resource" "docker_build" {
-  provisioner "local-exec" {
-    command = "docker build -t ${local.image_uri} ."
-  }
-
-  triggers = {
-    image_uri       = local.image_uri
-    main_hash       = filesha256("${path.module}/main.py")
-    dockerfile_hash = filesha256("${path.module}/Dockerfile")
-  }
-}
-
-resource "null_resource" "docker_push" {
-  provisioner "local-exec" {
-    command = "docker push ${local.image_uri}"
-  }
-
-  triggers = {
-    image_uri       = local.image_uri
-    main_hash       = filesha256("${path.module}/main.py")
-    dockerfile_hash = filesha256("${path.module}/Dockerfile")
-  }
-
-  depends_on = [
-    null_resource.docker_build,
-    google_artifact_registry_repository.docker_repo
-  ]
-}
-
 # ============ CLOUD RUN JOB ============
 
 resource "google_cloud_run_v2_job" "prayer_scraper_job" {
@@ -228,7 +197,7 @@ resource "google_cloud_run_v2_job" "prayer_scraper_job" {
     }
   }
 
-  depends_on = [null_resource.docker_push]
+  depends_on = [google_artifact_registry_repository.docker_repo]
 }
 
 # ============ CLOUD SCHEDULER JOB ============
