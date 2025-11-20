@@ -14,7 +14,7 @@ Muslims pray five times a day and the exact prayer times change daily based on l
 
 ## Architecture Diagram
 
-<img width="1696" height="1301" alt="Prayer Times Architecture Diagram" src="https://github.com/user-attachments/assets/262b11d9-0f22-476c-ab1b-d0093e11748e" />
+<img width="2096" height="1303" alt="Prayer Times Architecture Diagram" src="https://github.com/user-attachments/assets/53c9bdbd-a169-41d2-9430-6cb95312d900" />
 
 ### Initial Setup (Terraform)
 
