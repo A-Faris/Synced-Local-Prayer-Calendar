@@ -19,11 +19,17 @@ Muslims pray five times a day and the exact prayer times change daily based on l
 ### Initial Setup (Terraform)
 
 Terraform automatically provisions all the required infrastructure:
-- Builds a Docker image containing the Python scraping script
-- Pushes the image to Artifact Registry
+- Creates Artifact Registry repository
 - Creates a Google Cloud Run Job to run the script
 - Creates a Cloud Scheduler job to trigger the Cloud Run Job
 - Creates a service account and stores its credentials in Secret Manager
+
+### GitHub Actions CI/CD
+
+On every push to the main branch, GitHub Action workflow:
+- Builds Docker image
+- Pushes the image to Artifact Registry
+- Updates and runs Cloud Run Job with the new image
 
 ### Daily Run
 
@@ -118,7 +124,7 @@ This will:
 - Enable required Google Cloud APIs
 - Create the service account and assign IAM roles
 - Store service account credentials in Secret Manager
-- Build and push the Docker image to Artifact Registry
+- Create Artifact Registry repository
 - Create the Cloud Run job
 - Schedule the job with Cloud Scheduler
 
