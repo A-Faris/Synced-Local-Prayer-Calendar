@@ -1,58 +1,41 @@
-name: Build & Push Docker → Artifact Registry → Update Cloud Run Job
+name: Deploy Cloud Run Job
+
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
     paths:
-      - 'main.py'
-      - 'Dockerfile'
+      - "main.py"
+      - "Dockerfile"
+
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: 'read'
+
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
+    - uses: docker/setup-buildx-action@v2
 
-    - name: Authenticate to GCP
-      uses: google-github-actions/auth@v1
+    - uses: google-github-actions/auth@v1
       with:
         credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-    - name: Configure Docker to use Artifact Registry
-      run: |
-        gcloud --quiet auth configure-docker ${ { env.ARTIFACT_REGISTRY_HOST } } || true
-      env:
-        ARTIFACT_REGISTRY_HOST: "${{ inputs.region }}-docker.pkg.dev"
+    - name: Configure Artifact Registry
+      run: gcloud --quiet auth configure-docker "${{ secrets.GCP_REGION }}-docker.pkg.dev"
 
-    - name: Set variables
+    - name: Build image tag
       run: |
-        echo "REGION=${{ secrets.GCP_REGION }}" >> $GITHUB_ENV
-        echo "PROJECT=${{ secrets.GCP_PROJECT }}" >> $GITHUB_ENV
-        echo "REPO=${{ secrets.ARTIFACT_REPO }}" >> $GITHUB_ENV
-        echo "IMAGE=${{ secrets.IMAGE_NAME }}" >> $GITHUB_ENV
-        SHORT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-7)
-        IMAGE_TAG="${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ secrets.ARTIFACT_REPO }}/${{ secrets.IMAGE_NAME }}:sha-${SHORT_SHA}"
-        echo "IMAGE_URI=$IMAGE_TAG" >> $GITHUB_ENV
-        echo "SHORT_SHA=$SHORT_SHA" >> $GITHUB_ENV
+        SHORT_SHA=$(echo $GITHUB_SHA | cut -c1-7)
+        echo "IMAGE_URI=${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ secrets.ARTIFACT_REPO }}/${{ secrets.IMAGE_NAME }}:sha-$SHORT_SHA" >> $GITHUB_ENV
 
-    - name: Build and push image
+    - name: Build & Push
       run: |
-        echo "Building ${IMAGE_URI}"
-        docker build -t "${IMAGE_URI}" .
-        docker push "${IMAGE_URI}"
-      env:
-        IMAGE_URI: ${{ env.IMAGE_URI }}
+        docker build -t "$IMAGE_URI" .
+        docker push "$IMAGE_URI"
 
-    - name: Update Cloud Run Job to use new image
+    - name: Update Cloud Run Job
       run: |
-        echo "Updating Cloud Run Job ${JOB_NAME} to ${IMAGE_URI}"
         gcloud run jobs update "${{ secrets.CLOUD_RUN_JOB_NAME }}" \
-          --image="${IMAGE_URI}" \
-          --region="${{ secrets.GCP_REGION }}" \
-          --project="${{ secrets.GCP_PROJECT }}"
-      env:
-        IMAGE_URI: ${{ env.IMAGE_URI }}
+        --image="$IMAGE_URI" \
+        --region="${{ secrets.GCP_REGION }}" \
+        --project="${{ secrets.GCP_PROJECT }}"
