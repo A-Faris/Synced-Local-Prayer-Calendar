@@ -180,6 +180,7 @@ resource "google_cloud_run_v2_job" "prayer_scraper_job" {
   name     = var.service_name
   location = var.region
   deletion_protection = false
+  
 
   template {
     template {
@@ -187,6 +188,7 @@ resource "google_cloud_run_v2_job" "prayer_scraper_job" {
         image = local.image_uri
       }
       service_account = google_service_account.prayer_scraper_sa.email
+      max_retries = 0
     }
   }
 
