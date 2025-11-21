@@ -65,6 +65,7 @@ def clear_calendar_events(service: service_account.Credentials, calendar_id: str
     while True:
         events_result = service.events().list(
             calendarId=calendar_id,
+            timeMax=datetime.combine(date.today(), datetime.min.time()).isoformat() + "Z",
             singleEvents=True,
             pageToken=page_token
         ).execute()
@@ -78,7 +79,20 @@ def clear_calendar_events(service: service_account.Credentials, calendar_id: str
         if not page_token:
             break
 
-def create_event(service: service_account.Credentials, calendar_id: str, prayer: str, time: datetime) -> None:
+def event_exists(service, calendar_id, prayer):
+    return bool(service.events().list(
+        calendarId=calendar_id,
+        timeMin=datetime.combine(date.today(), datetime.min.time()).isoformat() + "Z",
+        timeMax=datetime.combine(date.today(), datetime.max.time()).isoformat() + "Z",
+        singleEvents=True,
+        q=prayer
+    ).execute().get("items", []))
+
+def create_event(service, calendar_id, prayer, time):
+    if event_exists(service, calendar_id, prayer):
+        print(f"⏩ Skipping existing event: {prayer} at {time}")
+        return
+    
     event = {
         "summary": prayer,
         "start": {"dateTime": time, "timeZone": "Europe/London"},
@@ -104,7 +118,7 @@ if __name__ == "__main__":
         calendar_name = f"{masjid} Prayer Times"
         print(f"\n🕌 {calendar_name}\n")
         calendar_id = get_calendar_id(service, calendar_name)
-        
+
         clear_calendar_events(service, calendar_id)
         prayer_times = get_prayer_times()
         for prayer, time in prayer_times.items():
