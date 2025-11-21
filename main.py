@@ -60,20 +60,25 @@ def get_calendar_id(service: service_account.Credentials, calendar_name: str, ti
         
     return create_calendar_id(service, calendar_name, timezone)
 
-def event_exists(service: service_account.Credentials, calendar_id: str, prayer: str) -> bool:
-    return bool(service.events().list(
-        calendarId=calendar_id,
-        timeMin=datetime.combine(date.today(), datetime.min.time()).isoformat() + "Z",
-        timeMax=datetime.combine(date.today(), datetime.max.time()).isoformat() + "Z",
-        singleEvents=True,
-        q=prayer
-    ).execute().get("items", []))
+def clear_calendar_events(service: service_account.Credentials, calendar_id: str) -> None:
+    page_token = None
+    while True:
+        events_result = service.events().list(
+            calendarId=calendar_id,
+            singleEvents=True,
+            pageToken=page_token
+        ).execute()
+
+        events = events_result.get("items", [])
+        for event in events:
+            service.events().delete(calendarId=calendar_id, eventId=event["id"]).execute()
+            print(f"❌ Deleted event: {event.get('summary')}")
+
+        page_token = events_result.get("nextPageToken")
+        if not page_token:
+            break
 
 def create_event(service: service_account.Credentials, calendar_id: str, prayer: str, time: datetime) -> None:
-    if event_exists(service, calendar_id, prayer):
-        print(f"⏩ Skipping existing event: {prayer} at {time}")
-        return
-    
     event = {
         "summary": prayer,
         "start": {"dateTime": time, "timeZone": "Europe/London"},
@@ -98,8 +103,9 @@ if __name__ == "__main__":
     for masjid, get_prayer_times in MASJIDS.items():
         calendar_name = f"{masjid} Prayer Times"
         print(f"\n🕌 {calendar_name}\n")
-        
         calendar_id = get_calendar_id(service, calendar_name)
+        
+        clear_calendar_events(service, calendar_id)
         prayer_times = get_prayer_times()
         for prayer, time in prayer_times.items():
             create_event(service, calendar_id, prayer, time)
