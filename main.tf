@@ -109,7 +109,8 @@ locals {
   iam_roles = [
     "roles/artifactregistry.writer",
     "roles/run.admin",
-    "roles/secretmanager.secretAccessor"
+    "roles/secretmanager.secretAccessor",
+    "roles/secretmanager.viewer"
   ]
 }
 
